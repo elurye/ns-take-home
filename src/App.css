@@ -2,20 +2,9 @@
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
 .App-header {
   background-color: #282c34;
-  min-height: 100vh;
+  height: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -26,6 +15,48 @@
 
 .App-link {
   color: #61dafb;
+}
+
+.App-body {
+  padding: 20px;
+  word-break: break-word;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.App-body .coin-search-input {
+  width: 100%;
+  max-width: 300px;
+}
+
+.App-body .coin-search-btn {
+  padding: 8px 22px;
+  height: 56px;
+  margin-left: 4px;
+}
+
+.App-body .row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 10px;
+  border-top: 1px solid lightgray;
+}
+
+.App-body .row.header {
+  font-weight: bold;
+  margin: 20px 0 0;
+  border-bottom: 1px solid lightgray;
+}
+
+.App-body .row .coin-identification {
+  flex: 0 1 65%;
+  margin-left: 60px;
+  text-align: left;
+}
+
+.App-body .row .count-count {
+  margin-right: 15px;
 }
 
 @keyframes App-logo-spin {
