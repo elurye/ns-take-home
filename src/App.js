@@ -1,71 +1,108 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
-import axios from "axios";
-import TextField from '@material-ui/core/TextField';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import axios from 'axios';
+import AutoComplete from './components/AutoComplete';
 import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 function App() {
-  const [data, setData] = useState({ rates: [] });
+  const [currencies, setCurrencies] = useState([]);
+  const [rates, setRates] = useState({ rates: [] });
   const [addCoin, setAddCoin] = useState(false);
   const [trackedRates, setTrackedRates] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const isMounted = useRef(null);
 
   useEffect(() => {
-    async function fetchData() {
-      const result = await axios(
-        'https://api.coinbase.com/v2/exchange-rates',
-      );
+    isMounted.current = true;
 
-      setData(result.data.data);
+    function fetchData() {
+      axios.get(
+        'https://api.coinbase.com/v2/currencies',
+      ).then(result => {
+        const options = result.data.data.map((item) => {
+          return {label: item.name, id: item.id};
+        });
+        setCurrencies(options);
+      }).catch(err => {
+        console.log(err);
+        setIsError(true);
+      }).finally(() => {
+        if (isMounted.current) {
+          setIsLoading(false)
+        }
+      });
     }
     fetchData();
+
+    return () => {
+      // cancel subscription to useEffect
+      isMounted.current = false;   // clean up function
+    };
   }, []);
+
+  useEffect(() => {
+    function getRates() {
+      axios.get(
+        'https://api.coinbase.com/v2/exchange-rates',
+      ).then(result => {
+        setRates(result.data.data.rates);
+      }).catch(err => {
+        console.log(err);
+        setIsError(true);
+      });
+    }
+    getRates();
+  }, ['currencies']);
+
+  if (isLoading || isError) {
+    return <div className="App"><CircularProgress /></div>
+  }
 
   return (
     <div className="App">
-      <header className="App-header">
+      <div className="App-header">
         <p>
           Crypto Tracker
         </p>
-      </header>
+      </div>
       <section className="App-body">
-        <Autocomplete
-          options={ Object.keys(data?.rates).filter(rate => !Object.keys(trackedRates).includes(rate)) }
-          className="coin-search"
-          onChange={(event, newValue) => {
-            setAddCoin(newValue);
-          }}
-          inputValue={(addCoin && !trackedRates[addCoin]) ? addCoin : ''}
-          renderInput={(params) =>
-            <div>
-              <TextField {...params} className="coin-search-input" label="Search crypto coins" variant="outlined" />
-              <Button
-                variant="contained"
-                className="coin-search-btn"
-                color="primary" size="large"
-                disabled={ !addCoin }
-                onClick={ () => {
-                  console.log(addCoin);
-                  trackedRates[addCoin] = data.rates[addCoin];
-                  setTrackedRates(trackedRates);
-                  setAddCoin('');
-                } } >
-                Add Coin Tracking
-              </Button>
-            </div>
-          }
-        />
+        <form className="coin-search">
+          <AutoComplete
+            options={ currencies }
+            trackedRates={ trackedRates }
+            setAddCoin={ setAddCoin } />
+          <Button
+            variant="contained"
+            className="coin-search-btn"
+            color="primary" size="large"
+            disabled={ !addCoin }
+            type={"submit"}
+            onClick={ async () => {
+              addCoin.price = rates[addCoin.id];
+              addCoin.time = new Date(Date.now())
+              trackedRates.push(addCoin);
+              setTrackedRates(trackedRates);
+              setAddCoin('');
+            }}>
+            Add Tracking
+          </Button>
+        </form>
+
         <div className="row header">
-          <div className="coin-identification">Coin</div>
+          <div className="coin-identification">Currency</div>
           <div className="coin-price">Price</div>
+          <div className="coin-price-date">Last Updated</div>
         </div>
-        { Object.entries(trackedRates).map(([key, value], index) => (
-          <div className="row" key={ value + index }>
+        { trackedRates.map((item, index) => (
+          <div className="row" key={ item.id + index }>
             <div className="coin-identification">
-              <span className="count-count">{ (index+1) }</span>
-              <span>{ key }</span>
+              <span className="coin-count">{ (index+1) }</span>
+              <span>{ item.label + ' (' + item.id + ')' }</span>
             </div>
-            <div className="coin-price">{ '$' + parseFloat(value).toFixed(2) }</div>
+            <div className="coin-price">{ '$' + parseFloat(item.price).toFixed(2) }</div>
+            <div className="coin-price-date">{ `${item.time.toDateString()} ${item.time.toLocaleTimeString()}` }</div>
           </div>
         ))}
       </section>

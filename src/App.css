@@ -20,16 +20,19 @@
 .App-body {
   padding: 20px;
   word-break: break-word;
-  max-width: 500px;
+  max-width: 700px;
   margin: 0 auto;
 }
 
-.App-body .coin-search-input {
-  width: 100%;
-  max-width: 300px;
+.App-body .coin-search {
+  display: flex;
 }
 
-.App-body .coin-search-btn {
+.coin-search .MuiAutocomplete-root {
+  flex: 1 1 50%;
+}
+
+.App-body .coin-search .coin-search-btn {
   padding: 8px 22px;
   height: 56px;
   margin-left: 4px;
@@ -49,14 +52,27 @@
   border-bottom: 1px solid lightgray;
 }
 
+.App-body .row.header .coin-price {
+  margin-left: -100px;
+}
+
 .App-body .row .coin-identification {
-  flex: 0 1 65%;
-  margin-left: 60px;
+  flex: 0 1 45%;
+  margin-left: 20px;
   text-align: left;
 }
 
-.App-body .row .count-count {
+.App-body .row .coin-count {
+  flex: 0 1 20%;
+  text-align: left;
+}
+
+.App-body .row .coin-count {
   margin-right: 15px;
+}
+
+.App-body .row .coin-price-date {
+  font-size: 12px;
 }
 
 @keyframes App-logo-spin {
